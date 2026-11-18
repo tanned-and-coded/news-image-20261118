@@ -48,6 +48,10 @@ def write_atomically(destination: Path, data: bytes) -> None:
             tmp.flush()
             os.fsync(tmp.fileno())
         os.replace(tmp_name, destination)
+        # mkstemp creates the temp file with mode 0600; relax the finished
+        # output to the usual 0644 so a later process running as a
+        # different user can still read entry.png.
+        os.chmod(destination, 0o644)
     except BaseException:
         try:
             os.unlink(tmp_name)
